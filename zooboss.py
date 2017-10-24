@@ -2,18 +2,45 @@ import argparse
 import hashlib
 import os
 import Queue
+import shutil
 import threading
 
 END_PROCESS = False
 DIR_LISTED = False
 WORK = Queue.Queue()
+DESTINY_PATH = os.path.expanduser("~/.config/zooboss/binaries/")
+USE_MOVE = False
+USE_MAGIC = False
+
+
+def create_new_path(file_hash):
+    directory = os.path.join(
+            DESTINY_PATH,
+            file_hash[0:2],
+            file_hash[2:4],
+            file_hash[4:6],
+            file_hash[6:8])
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    return os.path.join(directory, file_hash)
 
 
 def execute(file_path):
     if not os.path.isfile(file_path):
         return
     with open(file_path, 'rb') as fd:
-        print(hashlib.md5(fd.read()).hexdigest() + ' ' + file_path)
+        file_hash = hashlib.md5(fd.read()).hexdigest()
+        print(file_hash + ' ' + file_path)
+        new_file_path = create_new_path(file_hash)
+        # if path not exists
+        if not os.path.exists(new_file_path):
+            if USE_MOVE:  # if must move
+                shutil.move(file_path, new_file_path)
+            else:  # else just copy maintaining the original file
+                shutil.copy(file_path, new_file_path)
+        else:  # if path already exists
+            if USE_MOVE:  # and we must move
+                os.remove(file_path)  # the delete original file
 
 
 def worker():
@@ -36,7 +63,7 @@ def threads_stop(threads):
             thread.join()
 
 
-def main(dir_path, destiny_path, move, n_threads):
+def main(dir_path, n_threads):
     global END_PROCESS
     global DIR_LISTED
 
@@ -76,12 +103,19 @@ if __name__ == '__main__':
             "--destiny",
             help="The destiny path to store files",
             action="store",
-            default=os.path.expanduser("~/.config/zooboss/binaries/"),
+            default=DESTINY_PATH,
             required=False)
     parser.add_argument(
             "-m",
             "--move",
             help="Determines that the origin file must be moved",
+            action="store_true",
+            default=False,
+            required=False)
+    parser.add_argument(
+            "-f",
+            "--filetype",
+            help="Determines that the destiny will use the file type",
             action="store_true",
             default=False,
             required=False)
@@ -95,5 +129,14 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if args.destiny:
+        DESTINY_PATH = args.destiny
+
+    if args.move:
+        USE_MOVE = args.move
+
+    if args.filetype:
+        USE_MAGIC = args.filetype
+
     if args.origin:
-        main(args.origin, args.destiny, args.move, int(args.threads))
+        main(args.origin, int(args.threads))
