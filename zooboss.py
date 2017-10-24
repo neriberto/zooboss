@@ -36,7 +36,7 @@ def threads_stop(threads):
             thread.join()
 
 
-def main(dir_path, n_threads):
+def main(dir_path, destiny_path, move, n_threads):
     global END_PROCESS
     global DIR_LISTED
 
@@ -72,6 +72,20 @@ if __name__ == '__main__':
             action='store',
             required=True)
     parser.add_argument(
+            "-d",
+            "--destiny",
+            help="The destiny path to store files",
+            action="store",
+            default=os.path.expanduser("~/.config/zooboss/binaries/"),
+            required=False)
+    parser.add_argument(
+            "-m",
+            "--move",
+            help="Determines that the origin file must be moved",
+            action="store_true",
+            default=False,
+            required=False)
+    parser.add_argument(
             "-t",
             "--threads",
             help="The number of threads",
@@ -82,4 +96,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.origin:
-        main(args.origin, int(args.threads))
+        main(args.origin, args.destiny, args.move, int(args.threads))
