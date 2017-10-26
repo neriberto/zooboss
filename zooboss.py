@@ -1,8 +1,10 @@
 import argparse
 import hashlib
+import logging
 import os
 import Queue
 import shutil
+import sys
 import threading
 
 END_PROCESS = False
@@ -30,7 +32,7 @@ def execute(file_path):
         return
     with open(file_path, 'rb') as fd:
         file_hash = hashlib.md5(fd.read()).hexdigest()
-        print(file_hash + ' ' + file_path)
+        logging.info(file_hash + ' ' + file_path)
         new_file_path = create_new_path(file_hash)
         # if path not exists
         if not os.path.exists(new_file_path):
@@ -66,6 +68,13 @@ def threads_stop(threads):
 def main(dir_path, n_threads):
     global END_PROCESS
     global DIR_LISTED
+
+    logging.basicConfig(level=logging.INFO,
+            format='%(asctime)s %(levelname)-8s %(message)s',
+            datefmt='%y-%m-%d %H:%M:%S',
+            stream=sys.stdout)
+    logging.getLogger("zooboss")
+    logging.addLevelName(logging.WARNING, '\033[1;31m%s\033[1;0m' % logging.getLevelName(logging.WARNING))
 
     try:
         threads = []
