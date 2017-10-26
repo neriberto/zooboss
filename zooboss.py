@@ -20,7 +20,7 @@ def create_new_path(file_hash):
             file_hash[2:4],
             file_hash[4:6],
             file_hash[6:8])
-    if not os.path.exists(directory):
+    if not os.path.isdir(directory):
         os.makedirs(directory)
     return os.path.join(directory, file_hash)
 
