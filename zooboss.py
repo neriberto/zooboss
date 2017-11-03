@@ -18,10 +18,10 @@ USE_MAGIC = False
 def create_new_path(file_hash):
     directory = os.path.join(
             DESTINY_PATH,
-            file_hash[0:2],
-            file_hash[2:4],
-            file_hash[4:6],
-            file_hash[6:8])
+            file_hash[0],
+            file_hash[1],
+            file_hash[2],
+            file_hash[3])
     if not os.path.isdir(directory):
         os.makedirs(directory)
     return os.path.join(directory, file_hash)
@@ -31,7 +31,7 @@ def execute(file_path):
     if not os.path.isfile(file_path):
         return
     with open(file_path, 'rb') as fd:
-        file_hash = hashlib.md5(fd.read()).hexdigest()
+        file_hash = hashlib.sha256(fd.read()).hexdigest()
         logging.info(file_hash + ' ' + file_path)
         new_file_path = create_new_path(file_hash)
         # if path not exists
