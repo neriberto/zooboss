@@ -10,14 +10,33 @@ import threading
 END_PROCESS = False
 DIR_LISTED = False
 WORK = Queue.Queue()
-DESTINY_PATH = os.path.expanduser("~/.config/zooboss/binaries/")
+DESTINY_PATH = os.path.expanduser("~/.zooboss/binaries/")
 USE_MOVE = False
 USE_MAGIC = False
 
 
-def create_new_path(file_hash):
+def get_file_type(file_path):
+    try:
+        import subprocess
+        file_process = subprocess.Popen(
+                ['file', '-b', file_path], stdout=subprocess.PIPE)
+        return file_process.stdout.read().strip()
+    except:
+        return None
+
+
+def create_new_path(file_hash, file_type):
+    if USE_MAGIC:
+        if file_type is not None:
+            mime = file_type.split()[0].lower()
+        else:
+            mime = "unknown"
+        directory = os.path.join(DESTINY_PATH, mime)
+    else:
+        directory = os.path.join(DESTINY_PATH)
+
     directory = os.path.join(
-            DESTINY_PATH,
+            directory,
             file_hash[0],
             file_hash[1],
             file_hash[2],
@@ -31,9 +50,13 @@ def execute(file_path):
     if not os.path.isfile(file_path):
         return
     with open(file_path, 'rb') as fd:
+        if USE_MAGIC:
+            file_type = get_file_type(file_path)
+        else:
+            file_type = None
         file_hash = hashlib.sha256(fd.read()).hexdigest()
         logging.info(file_hash + ' ' + file_path)
-        new_file_path = create_new_path(file_hash)
+        new_file_path = create_new_path(file_hash, file_type)
         # if path not exists
         if not os.path.exists(new_file_path):
             if USE_MOVE:  # if must move
