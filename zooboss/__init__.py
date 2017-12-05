@@ -97,6 +97,9 @@ def main():
     """Start the threads."""
     global END_PROCESS
     global DIR_LISTED
+    global DESTINY_PATH
+    global USE_MOVE
+    global USE_MAGIC
 
     logging.basicConfig(
         level=logging.INFO,
@@ -120,7 +123,7 @@ def main():
         "--destiny",
         help="The destiny path to store files",
         action="store",
-        default=os.path.expanduser("~/.zooboss/binaries/"),
+        default=DESTINY_PATH,
         required=False)
     parser.add_argument(
         "-m",
