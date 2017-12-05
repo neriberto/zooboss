@@ -93,7 +93,7 @@ def threads_stop(threads):
             thread.join()
 
 
-def main(dir_path, n_threads):
+def main():
     """Start the threads."""
     global END_PROCESS
     global DIR_LISTED
@@ -108,30 +108,6 @@ def main(dir_path, n_threads):
         logging.WARNING,
         '\033[1;31m%s\033[1;0m' % logging.getLevelName(logging.WARNING))
 
-    try:
-        threads = []
-        for idx in range(n_threads):
-            thread = threading.Thread(target=worker)
-            thread.daemon = True
-            thread.start()
-            threads.append(thread)
-
-        while not END_PROCESS:
-            if not DIR_LISTED:
-                for dirname, dirnames, filenames in os.walk(dir_path):
-                    for filename in filenames:
-                        WORK.put(os.path.join(dirname, filename))
-
-            DIR_LISTED = True
-
-            if WORK.qsize() == 0:
-                threads_stop(threads)
-
-    except KeyboardInterrupt:
-        threads_stop(threads)
-
-
-if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-o",
@@ -144,7 +120,7 @@ if __name__ == '__main__':
         "--destiny",
         help="The destiny path to store files",
         action="store",
-        default=DESTINY_PATH,
+        default=os.path.expanduser("~/.zooboss/binaries/"),
         required=False)
     parser.add_argument(
         "-m",
@@ -179,5 +155,31 @@ if __name__ == '__main__':
     if args.filetype:
         USE_MAGIC = args.filetype
 
-    if args.origin:
-        main(args.origin, int(args.threads))
+    if not args.origin:
+        return
+
+    try:
+        threads = []
+        for idx in range(int(args.threads)):
+            thread = threading.Thread(target=worker)
+            thread.daemon = True
+            thread.start()
+            threads.append(thread)
+
+        while not END_PROCESS:
+            if not DIR_LISTED:
+                for dirname, dirnames, filenames in os.walk(args.origin):
+                    for filename in filenames:
+                        WORK.put(os.path.join(dirname, filename))
+
+            DIR_LISTED = True
+
+            if WORK.qsize() == 0:
+                threads_stop(threads)
+
+    except KeyboardInterrupt:
+        threads_stop(threads)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
