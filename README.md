@@ -15,22 +15,28 @@ This is an application to organize all the malwares in a unorganized collection.
 
 `--threads` : The number of threads
 
+# Installation
+
+```
+$ pip install zooboss
+```
+
 # Examples
 
 The example bellow will scan the `/tmp/downloaded_files` using 10 threads to move the files to the samples directory inside the `$HOME` directory.
 
 ```
-$ python zooboss.py --origin /tmp/downloaded_files --destiny ~/samples -threads 10 --move
+$ zooboss --origin /tmp/downloaded_files --destiny ~/samples -threads 10 --move
 ```
 
 To create a copy (not move) don't use the `--move` parameter
 
 ```
-$ python zooboss.py --origin /tmp/downloaded_files --destiny ~/samples -threads 10
+$ zooboss --origin /tmp/downloaded_files --destiny ~/samples -threads 10
 ```
 
 To organize files and separating using the file type use the parameter `--filetype` :
 
 ```
-$ python zooboss.py --origin /tmp/downloaded_files --destiny ~/samples -threads 10 --move --filetype
+$ zooboss --origin /tmp/downloaded_files --destiny ~/samples -threads 10 --move --filetype
 ```
